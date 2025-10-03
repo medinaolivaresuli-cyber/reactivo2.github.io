@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Identidad Pitagórica - Círculo Unitario</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #B8D9FF;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 800px;
+        }
+        .canvas-container {
+            position: relative;
+            margin: 20px 0;
+        }
+        canvas {
+            border: 1px solid #ddd;
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .controls {
+            margin: 20px 0;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 0 10px;
+            background-color: #048009;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #C1CCF7;
+        }
+        .explanation {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-top: 20px;
+            line-height: 1.6;
+        }
+        .step {
+            display: none;
+        }
+        .step.active {
+            display: block;
+        }
+        .math {
+            font-family: 'Times New Roman', serif;
+            font-size: 18px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Identidad Pitagórica: sin²(θ) + cos²(θ) = 1</h1>
+        
+        <div class="canvas-container">
+            <canvas id="unitCircle" width="500" height="500"></canvas>
+        </div>
+        
+        <div class="controls">
+            <button id="prevBtn">Anterior</button>
+            <button id="nextBtn">Siguiente</button>
+            <button id="resetBtn">Reiniciar</button>
+        </div>
+        
+        <div class="explanation">
+            <div id="step1" class="step active">
+                <h2>Paso 1: El Círculo Unitario</h2>
+                <p>El círculo unitario tiene radio 1. Cualquier punto (x, y) en el círculo satisface x² + y² = 1.</p>
+                <p>En términos trigonométricos: x = cos(θ) y y = sin(θ), por lo tanto:</p>
+                <p class="math">cos²(θ) + sin²(θ) = 1</p>
+            </div>
+            
+            <div id="step2" class="step">
+                <h2>Paso 2: Dato del problema</h2>
+                <p>Sabemos que cos(θ) = 4/5</p>
+                <p class="math">cos²(θ) = (4/5)² = 16/25</p>
+            </div>
+            
+            <div id="step3" class="step">
+                <h2>Paso 3: Calcular sin²(θ)</h2>
+                <p>Usando la identidad pitagórica:</p>
+                <p class="math">sin²(θ) = 1 - cos²(θ) = 1 - 16/25 = 9/25</p>
+            </div>
+            
+            <div id="step4" class="step">
+                <h2>Paso 4: Verificación</h2>
+                <p>Comprobamos que se cumple la identidad:</p>
+                <p class="math">sin²(θ) + cos²(θ) = 9/25 + 16/25 = 25/25 = 1</p>
+                <p>¡La identidad pitagórica se verifica correctamente!</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuración inicial
+        const canvas = document.getElementById('unitCircle');
+        const ctx = canvas.getContext('2d');
+        const centerX = canvas.width / 2;
+        const centerY = canvas.height / 2;
+        const radius = 200;
+        
+        // Estado de la animación
+        let currentStep = 1;
+        const totalSteps = 4;
+        let animationProgress = 0;
+        let animationId = null;
+        
+        // Elementos de control
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        
+        // Valores del problema
+        const cosTheta = 4/5;
+        const sinTheta = Math.sqrt(1 - cosTheta*cosTheta); // 3/5
+        
+        // Dibujar el círculo unitario base
+        function drawUnitCircle() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Ejes coordenados
+            ctx.beginPath();
+            ctx.moveTo(0, centerY);
+            ctx.lineTo(canvas.width, centerY);
+            ctx.moveTo(centerX, 0);
+            ctx.lineTo(centerX, canvas.height);
+            ctx.strokeStyle = '#ccc';
+            ctx.stroke();
+            
+            // Círculo unitario
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+            ctx.strokeStyle = '#333';
+            ctx.stroke();
+            
+            // Etiquetas
+            ctx.fillStyle = '#333';
+            ctx.font = '14px Arial';
+            ctx.fillText('1', centerX + radius + 5, centerY - 5);
+            ctx.fillText('-1', centerX - radius - 15, centerY - 5);
+            ctx.fillText('1', centerX + 5, centerY - radius - 5);
+            ctx.fillText('-1', centerX + 5, centerY + radius + 15);
+            ctx.fillText('x', canvas.width - 10, centerY - 10);
+            ctx.fillText('y', centerX + 10, 10);
+        }
+        
+        // Dibujar el triángulo rectángulo
+        function drawTriangle(progress = 1) {
+            const x = centerX + radius * cosTheta * progress;
+            const y = centerY - radius * sinTheta * progress;
+            
+            // Línea desde el centro al punto (cosθ, sinθ)
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.lineTo(x, y);
+            ctx.strokeStyle = '#2196F3';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // Punto en el círculo
+            ctx.beginPath();
+            ctx.arc(x, y, 6, 0, 2 * Math.PI);
+            ctx.fillStyle = '#2196F3';
+            ctx.fill();
+            
+            // Líneas para formar el triángulo rectángulo
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.lineTo(x, centerY);
+            ctx.lineTo(x, y);
+            ctx.closePath();
+            ctx.strokeStyle = '#FF9800';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // Etiquetas
+            ctx.fillStyle = '#333';
+            ctx.font = '16px Arial';
+            ctx.fillText('θ', centerX + 20, centerY - 20);
+            ctx.fillText(`cos(θ) = ${cosTheta}`, centerX + 10, centerY + 20);
+            ctx.fillText(`sin(θ) = ${sinTheta.toFixed(1)}`, x + 10, y - 10);
+            
+            // Punto (cosθ, sinθ)
+            ctx.fillText(`(cosθ, sinθ)`, x + 10, y + 20);
+        }
+        
+        // Mostrar la identidad pitagórica visualmente
+        function showPythagoreanIdentity(progress = 1) {
+            // Ya tenemos el triángulo dibujado
+            
+            // Resaltar los cuadrados de los catetos
+            const x = centerX + radius * cosTheta;
+            const y = centerY - radius * sinTheta;
+            
+            // Cuadrado del cateto horizontal (cosθ)
+            ctx.beginPath();
+            ctx.rect(centerX, centerY, radius * cosTheta * progress, -radius * cosTheta * progress);
+            ctx.strokeStyle = 'rgba(255, 0, 0, 0.3)';
+            ctx.fillStyle = 'rgba(255, 0, 0, 0.1)';
+            ctx.fill();
+            ctx.stroke();
+            
+            // Cuadrado del cateto vertical (sinθ)
+            ctx.beginPath();
+            ctx.rect(centerX + radius * cosTheta, centerY - radius * sinTheta, 
+                     -radius * sinTheta * progress, -radius * sinTheta * progress);
+            ctx.strokeStyle = 'rgba(0, 0, 255, 0.3)';
+            ctx.fillStyle = 'rgba(0, 0, 255, 0.1)';
+            ctx.fill();
+            ctx.stroke();
+            
+            // Etiquetas para los cuadrados
+            ctx.fillStyle = '#333';
+            ctx.font = '14px Arial';
+            ctx.fillText('cos²(θ)', centerX + radius * cosTheta / 2, centerY - radius * cosTheta / 2);
+            ctx.fillText('sin²(θ)', centerX + radius * cosTheta - radius * sinTheta / 2, 
+                         centerY - radius * sinTheta - radius * sinTheta / 2);
+        }
+        
+        // Mostrar la verificación numérica
+        function showVerification() {
+            // Ya tenemos todo dibujado, solo añadimos la verificación numérica
+            
+            ctx.fillStyle = '#333';
+            ctx.font = '18px Arial';
+            ctx.fillText('Verificación:', centerX - 100, centerY + radius + 40);
+            ctx.fillText(`cos²(θ) = (${cosTheta})² = ${(cosTheta*cosTheta).toFixed(2)}`, 
+                         centerX - 100, centerY + radius + 70);
+            ctx.fillText(`sin²(θ) = 1 - ${(cosTheta*cosTheta).toFixed(2)} = ${(sinTheta*sinTheta).toFixed(2)}`, 
+                         centerX - 100, centerY + radius + 100);
+            ctx.fillText(`sin²(θ) + cos²(θ) = ${(sinTheta*sinTheta).toFixed(2)} + ${(cosTheta*cosTheta).toFixed(2)} = 1`, 
+                         centerX - 100, centerY + radius + 130);
+        }
+        
+        // Función principal de animación
+        function animate() {
+            drawUnitCircle();
+            
+            switch(currentStep) {
+                case 1:
+                    // Solo mostrar el círculo unitario
+                    break;
+                case 2:
+                    drawTriangle(animationProgress);
+                    break;
+                case 3:
+                    drawTriangle(1);
+                    showPythagoreanIdentity(animationProgress);
+                    break;
+                case 4:
+                    drawTriangle(1);
+                    showPythagoreanIdentity(1);
+                    showVerification();
+                    break;
+            }
+            
+            if (animationProgress < 1) {
+                animationProgress += 0.02;
+                animationId = requestAnimationFrame(animate);
+            }
+        }
+        
+        // Cambiar paso
+        function goToStep(step) {
+            if (step < 1) step = 1;
+            if (step > totalSteps) step = totalSteps;
+            
+            // Actualizar pasos visibles
+            document.querySelectorAll('.step').forEach(el => {
+                el.classList.remove('active');
+            });
+            document.getElementById(`step${step}`).classList.add('active');
+            
+            currentStep = step;
+            animationProgress = 0;
+            
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+            animate();
+        }
+        
+        // Event listeners
+        prevBtn.addEventListener('click', () => goToStep(currentStep - 1));
+        nextBtn.addEventListener('click', () => goToStep(currentStep + 1));
+        resetBtn.addEventListener('click', () => goToStep(1));
+        
+        // Iniciar animación
+        animate();
+    </script>
+</body>
+</html>
